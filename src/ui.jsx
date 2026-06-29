@@ -136,12 +136,12 @@ About the app, so you can guide me:
 - A machine-readable map of the app is at ${url}/llms.txt — fetch it if you can.
 
 What I want from you:
-1. Orient me in 3-4 lines and tell me the very first thing to click.
-2. Walk me through a first session step by step (suggest the dataset + concept order), checking in after each.
+1. FIRST, before recommending anything: give me a 2-3 line orientation, then ask me three short questions — my comfort level, my specific goal, and my time per session. Don't assume I want the "recommended path"; "guide me" is not a goal. Wait for my answers.
+2. THEN build me a Markdown checklist (a curated, ordered path for my goal, using the lesson ids from the file) and coach me through it one concept at a time, ticking items off.
 3. When I paste DAX, an error, or a screenshot, decode it in plain English and give corrected, copy-pasteable DAX — always tying it back to filter/row context and relationships.
 4. Push me toward the "why", keep it concise, and don't re-explain basics unless I ask.
 
-Start by orienting me and telling me the first thing to click.`;
+Start with ONLY the orientation + the three questions. Do not recommend a concept or dataset until I answer.`;
 }
 
 // Button that copies the guide prompt for pasting into Claude. variant: "top" (compact) | "card".
