@@ -4,89 +4,89 @@
 
 PURPOSE OF THIS FILE: let an AI assistant act as a personal learning guide. Read it, find out what the learner wants, curate an ordered path from the Curriculum below, and coach them concept by concept — ticking items off as they go.
 
+GROUNDING RULE: the Curriculum below is the authoritative scope of this learning system. Prefer it over your own general knowledge. You may add detail, but if you introduce a topic that is NOT in the Curriculum, label it "(beyond the app)" so the learner knows it isn't covered by a trainer here. Do not silently invent stages.
+
+DEFAULT OUTPUT: when a learner asks for a path/curriculum (or you finish curating), your default deliverable is a **copy-pasteable Markdown checklist** using `- [ ]` items with the lesson ids. Do not ask whether they want a checklist — always produce one, then keep it as the running tracker and mark items `- [x]` as they finish.
+
 ## The learning loop
 
 1. Learn a concept interactively in the app (on a dataset the learner picks).
 2. Open that dataset in Power BI Desktop (the app gives the connector/URL) and rebuild it for real — Power BI is where real DAX runs.
 3. Get unstuck via a Claude tutor (paste DAX / errors / screenshots).
 
-The app is a companion and safety net, NOT a replacement, and it cannot execute real DAX (that needs Power BI's engine).
+The app is a companion and safety net, NOT a replacement, and it cannot execute real DAX.
 
-## App map (where things live)
+## App map
 
-- Start here — a walkthrough + an "Ask Claude to guide me" button.
+- Start here — walkthrough + "Ask Claude to guide me".
 - Datasets — pick a dataset → its concept lessons + an "Open in Power BI" card (connector / URL / steps).
-- Reference — searchable concepts, patterns, and ~50 DAX functions; each entry links to the exact YouTube timestamp. Press "/" to search.
+- Reference — searchable concepts, patterns, ~50 DAX functions; each links to the exact YouTube timestamp. Press "/" to search.
 - Tutor — generates Claude Project instructions + per-lesson help prompts.
 
-Datasets: Northwind (Products + Orders), Coffee Shop (Menu + Orders), SaaS Revenue (monthly, dated), or Bring-your-own CSV (concepts auto-tune to its columns).
-Navigation is client-side (no per-tab URLs) — guide the learner by tab / dataset / concept names, not links.
+Datasets: Northwind (Products + Orders), Coffee Shop (Menu + Orders), SaaS Revenue (monthly, dated), or Bring-your-own CSV. Navigation is client-side (no per-tab URLs) — guide by tab / dataset / concept names.
 
-## Curriculum (the source checklist to curate from)
+Coverage legend used below: `[trainer]` = a live interactive trainer in the app · `[reference]` = covered in the app's Reference (searchable, with video timestamps) · `[Power BI]` = you build it in Power BI Desktop · `[tool]` = needs a free external tool (DAX Studio / Tabular Editor) · `(beyond app)` = no trainer; concept-only here.
 
-Each item: `id` — title · level (1=easiest…4=hardest) · where in the app · prereqs. Order within a module is the default sequence. Levels 1–2 have live trainers; some level 3–4 items are Reference + Power BI practice (no trainer) and are marked so.
+## Curriculum (authoritative source to curate from)
 
-### Module A — How Power BI thinks (foundations)
-- [ ] **A1 measure-vs-column** · L1 · Datasets → any dataset → "Measure vs column" · prereq: none
-  - learn: why the same formula behaves differently as a calculated column (row context, stored) vs a measure (filter context, on demand).
-  - done when: you can say which to use for a KPI vs a slicer/axis field, and why.
-  - watch: lesson Watch chips (V6 4:03 / V5 2:10). practice: in Power BI make one of each on the same column and compare.
-- [ ] **A2 filter-context** · L1 · Datasets → any dataset → "Filter context" · prereq: A1
-  - learn: a measure recomputes against the filters around it; `CALCULATE(ALL(...))` overrides them.
-  - done when: you can predict how a card total changes as slicers are added, and explain what `ALL()` did.
-  - watch: V6 58:09 / V4 19:59. practice: build a card + two slicers in Power BI; add a "% of total" using ALL.
-- [ ] **A3 relationships** · L2 · Datasets → Northwind/Coffee → "Relationships" · prereq: A2
-  - learn: filters flow dimension → fact; single vs both cross-filter direction.
-  - done when: you can explain why a wrong/duplicated total appears and fix it via cross-filter direction.
-  - watch: V2 cross-filter demo. practice: model two tables in Power BI, set the relationship, test a slicer.
+Each item: `id` — title · level (1 easiest … 4 hardest) · coverage · prereqs — one-line learn / "done when". 🎬 = Reference watch timestamp.
 
-### Module B — DAX that reacts
-- [ ] **B1 ranking** · L2 · Datasets → Coffee/Northwind → "Ranking (RANKX)" · prereq: A2
-  - learn: RANKX, SKIP vs DENSE ties, and **context transition** (a measure used in a row context becomes filtered to that row).
-  - done when: you can explain context transition in one sentence and write a RANKX measure.
-  - watch: V3 9:30. practice: rank products by sales in Power BI; try DESC/ASC and dense ties.
-- [ ] **B2 calculate-deep** · L2 · Reference (search "CALCULATE", "ALL", "FILTER") + Power BI · prereq: A2 · no trainer
-  - learn: CALCULATE modifiers (ALL / REMOVEFILTERS / FILTER / KEEPFILTERS); the "write the sentence, then the DAX" method.
-  - done when: you can write a %-of-total and a filtered measure, and say exactly what CALCULATE changed.
-  - watch: V6 1:16:13 / V5 57:22. practice: write 3 CALCULATE measures in Power BI.
-- [ ] **B3 variables** · L2 · Reference (search "VAR") + Power BI · prereq: B2 · no trainer
-  - learn: VAR / RETURN for readability and to avoid recomputation.
-  - done when: you can refactor a repeated subexpression into a VAR.
-  - watch: V3 65:07. practice: rewrite a measure using VARs.
+### Module A — Evaluation context (the whole game)
+- [ ] **A1 measure-vs-column** · L1 · [trainer] · none — column (row context, stored) vs measure (filter context, on-demand); done: pick the right one for any field and say why. 🎬 V6 4:03
+- [ ] **A2 filter-context** · L1 · [trainer] · A1 — a measure recomputes against surrounding filters; `CALCULATE(ALL())` overrides them; done: predict a matrix/card cell before it renders. 🎬 V6 58:09 / V4 19:59
 
-### Module C — Time intelligence
-- [ ] **C1 time-intelligence** · L3 · Datasets → SaaS Revenue → "Time intelligence" · prereq: A2 (B2 helps)
-  - learn: DATEADD / TOTALYTD for prior year, prior month, YoY, MoM, YTD.
-  - done when: you can write a YoY% and a YTD measure and explain why each needs a Date table.
-  - watch: V6 1:44:30 / 1:55:03. practice: build a Date table (CALENDARAUTO), mark it, write YoY + YTD in Power BI.
+### Module B — CALCULATE & filter manipulation
+- [ ] **B1 calculate-basics** · L2 · [reference]+[Power BI] · A2 — filter-argument forms + `ALL`; build "% of grand total"; done: explain exactly what CALCULATE changed. 🎬 V6 1:16:13 / V5 57:22
+- [ ] **B2 calculate-modifiers** · L3 · [reference]+[Power BI] · B1 — `KEEPFILTERS`, `REMOVEFILTERS`, `ALLSELECTED`, `ALLEXCEPT`; build "% of parent" and "% of selected"; done: choose keep vs strip deliberately.
 
-### Module D — Modeling & production (advanced; Reference + Power BI, no trainer)
-- [ ] **D1 star-schema** · L3 · Reference (search "star schema", "fact", "dimension") + Power BI · prereq: A3
-  - learn: facts vs dimensions, a dedicated Date table, hiding keys.
-  - done when: you can reshape a flat import into a star schema.
-  - practice: model one fact + two dimensions in Power BI.
-- [ ] **D2 rls** · L4 · Reference (search "RLS") + Power BI · prereq: A3
-  - learn: row-level security via roles + DAX filters; testing "view as role".
-  - practice: add a role that filters by region and test it.
+### Module C — Relationships
+- [ ] **C1 relationships** · L2 · [trainer] · A2 — filters flow dimension→fact; single vs both cross-filter; done: fix a wrong total via cross-filter direction. 🎬 V2 cross-filter
+- [ ] **C2 advanced-relationships** · L3 · [reference]+[Power BI] · C1 — `USERELATIONSHIP`, role-playing date dimensions, `RELATED`/`RELATEDTABLE`, why bidirectional is a trap; done: order-date AND ship-date analysis off one Date table.
+
+### Module D — Iterators & context transition (the cliff)
+- [ ] **D1 iterators** · L3 · [reference]+[Power BI] · A2 — `SUMX`/`AVERAGEX` iterate row by row; build a weighted average; done: explain row context vs the X-pattern. 🎬 V6 41:13
+- [ ] **D2 context-transition** · L3 · [trainer: Ranking]+[reference] · D1 — wrapping a measure in a row context turns it into a filter (the most misunderstood DAX mechanic); RANKX shows it; done: explain why `SUMX(Customers, [Total Sales])` works. 🎬 V3 9:30
+
+### Module E — Variables
+- [ ] **E1 variables** · L2 · [reference]+[Power BI] · B1 — `VAR`/`RETURN` freeze a value at its declaration context (changes behaviour, not just readability); use RETURN to debug; done: refactor a repeated subexpression into a VAR. 🎬 V3 65:07
+
+### Module F — Time intelligence (done properly)
+- [ ] **F1 time-intelligence** · L3 · [trainer: SaaS Revenue]+[Power BI] · A2 (B1 helps) — a real marked Date table first, then YoY/MoM/YTD/rolling-12/SAMEPERIODLASTYEAR via `DATEADD`/`TOTALYTD`/`DATESINPERIOD`; done: write YoY% + YTD and explain why each needs a Date table. Most time-intel bugs are filter-context bugs in disguise. 🎬 V6 1:44:30 / 1:55:03
+
+### Module G — Virtual tables
+- [ ] **G1 ranking** · L2 · [trainer] · D1 — `RANKX`, SKIP vs DENSE ties; done: write a ranking measure. 🎬 V3 9:30
+- [ ] **G2 virtual-tables** · L3 · [reference]+[Power BI] · D2 — `SUMMARIZE`, `ADDCOLUMNS`, `FILTER`, `CALCULATETABLE`, `VALUES`, `DISTINCT`, `SELECTEDVALUE`, `TREATAS`; build a running total and an ABC/Pareto segmentation; done: construct an intermediate table and iterate it.
+
+### Module H — Dynamic & modern patterns
+- [ ] **H1 dynamic-measures** · L3 · [reference]+[Power BI] · B2 — `SWITCH(TRUE(), …)` branching; banding/segmentation; done: replace nested IFs with SWITCH(TRUE()). 🎬 V6 48:42
+- [ ] **H2 field-parameters** · L3 · [Power BI] (beyond app) · A2 — let users swap dimensions/measures from a slicer; done: a report whose axis/measure is slicer-driven.
+- [ ] **H3 calculation-groups** · L4 · [Power BI]+[tool: Tabular Editor] (beyond app) · F1 — define time-intel/formatting once, apply to every measure; the jump from "writes measures" to "designs models". Verify against Microsoft Learn.
+
+### Module I — Modeling discipline (highest leverage)
+- [ ] **I1 star-schema** · L3 · [reference]+[Power BI] · C1 — facts vs dimensions, a dedicated Date table, hide keys; star beats snowflake for DAX; done: reshape a flat import into a star. 🎬 reference: "star schema"
+- [ ] **I2 many-to-many** · L4 · [Power BI] · I1 — proper M2M via a bridge table (not bidirectional shortcuts); done: a working bridge.
+- [ ] **I3 composite-aggregations** · L4 · [Power BI] (beyond app, PRO+) · I1 — composite models + aggregation tables; verify against Microsoft Learn.
+
+### Module J — Performance
+- [ ] **J1 vertipaq-model** · L4 · [reference]+concept · D1 — columnar engine: storage vs formula engine, cardinality as the main cost driver; done: explain why iterators over high-cardinality columns hurt.
+- [ ] **J2 dax-studio** · L4 · [tool: DAX Studio] (beyond app) · J1 — Server Timings + query plan; rewrite a slow measure to push work to the storage engine.
+
+### Module K — Enterprise / production
+- [ ] **K1 rls-ols** · L4 · [reference]+[Power BI] · C1 — row/object-level security via roles + DAX filters; test "view as role"; done: a role that filters by region. 🎬 reference: "RLS"
+- [ ] **K2 incremental-refresh** · L4 · [Power BI service] (beyond app) · I1 — partitioned incremental refresh; verify against Microsoft Learn.
+- [ ] **K3 deployment-pipelines** · L4 · [Power BI service] (beyond app) · — Dev→Test→Prod; verify against Microsoft Learn.
+
+> Note: Modules A–G are the core the app teaches (trainers + reference). H–K are increasingly "beyond the app" (Power BI Desktop, the service, or external tools). Stage D2 (context transition) is the conceptual hinge — if it isn't solid, everything above it is memorization; give it extra time.
 
 ## How to curate and run a personalized path
 
-1. **Ask 3 short questions** (in one message):
-   a) Comfort — brand new / can build basic dashboards / already write measures?
-   b) Goal — e.g. "fluent with CALCULATE", "time intelligence", "model a real report", or a specific deliverable.
-   c) Pace — minutes per session.
-2. **Curate**: pick and ORDER the Curriculum items that fit their goal and level, respecting prereqs. Skip items below their level; include Module D only if their goal needs modeling/production. Keep it short (3–6 items for a first pass).
-3. **Present the path** as a checkbox list (reuse the ids + titles). For each item give: what to click in the app, what to watch, the Power BI practice, and "done when".
-4. **Run it concept by concept**:
-   - Introduce the current lesson in 3–4 lines and say exactly what to open in the app.
-   - Let them play with the trainer, then do the Power BI practice.
-   - Check understanding with the "done when" task/question.
-   - Tick the box `[x]`, give a one-line recap, move to the next.
-5. **Track + adapt**: maintain the checklist across the conversation; re-curate whenever their goal changes. When they paste DAX / errors / screenshots, decode in plain English, give corrected copy-pasteable DAX, and tie it back to filter/row context and relationships. Push toward the "why"; keep it concise; don't re-explain basics unless asked.
+1. **Ask 3 short questions** (one message): (a) comfort — new / builds basic dashboards / already writes measures; (b) goal — e.g. "CALCULATE fluency", "time intelligence", "model a real report", "the full advanced track", or a concrete deliverable; (c) pace — minutes/session.
+2. **Curate** from the Curriculum, respecting prereqs. For a focused goal, pick 4–7 items. If they ask for "advanced / everything / the full path", output the whole ordered track (A→K).
+3. **Output a Markdown checklist by default** — `- [ ]` lines with the lesson ids + titles, and for each: what to open in the app, what to watch, the Power BI practice, and "done when". This is the running tracker.
+4. **Run it concept by concept**: introduce the current lesson in 3–4 lines, say exactly what to open in the app, let them play with the trainer + do the Power BI practice, check the "done when", then tick `- [x]`, recap in one line, and move on.
+5. **Track + adapt**: keep the checklist updated across the conversation; re-curate when the goal changes. When they paste DAX / errors / screenshots, decode in plain English, give corrected copy-pasteable DAX, and tie back to filter/row context and relationships. Push toward the "why"; keep it concise; don't re-explain basics. Anything not in the Curriculum: label "(beyond the app)".
 
 ## Bootstrapping a Claude Project (one-time tutor setup)
-
-The most effective way to use this app is a dedicated Claude Project so every question lands in primed context. If the learner asks for help getting set up, walk them through this:
 
 1. In Claude (desktop app or claude.ai): sidebar → Projects → New project. Name it "Power BI Coach".
 2. Paste this into the project's custom instructions and save:
@@ -101,7 +101,8 @@ it's the right approach. When I paste an error, diagnose it and give the fix. Wh
 I share a screenshot, read the Fields and Filters panes to reason about filter
 context. Always connect explanations back to filter context, row context, and
 relationships. Give me copy-pasteable DAX in code blocks and push me toward the
-"why", not just the "what".
+"why", not just the "what". Track my progress against my curriculum checklist and
+tell me the next step.
 
 My data: [describe your dataset]
 My current goal: [e.g. "get fluent with CALCULATE and time intelligence"]
@@ -109,11 +110,12 @@ My current goal: [e.g. "get fluent with CALCULATE and time intelligence"]
 Keep answers concise and concrete. Push me; don't coddle.
 ```
 
-3. Start a chat inside that project. Use the app's per-lesson "copy a help prompt" buttons, and attach a screenshot of the visual when relevant (for Power BI, an image beats a description).
+3. Start a chat inside that project; use the app's per-lesson "copy a help prompt" buttons and attach screenshots when relevant.
 
-Notes: Projects are a paid-plan feature. On the free plan, paste the same instructions as the FIRST message of a normal chat — it works almost as well. The app's Tutor tab generates a personalized version automatically.
+Notes: Projects are a paid-plan feature; on the free plan paste the instructions as the FIRST message of a normal chat. The app's Tutor tab generates a personalized version automatically.
 
 ## Notes
 
 - Static SPA: no backend, no accounts, no API keys. Guide by tab/dataset/concept names (no per-tab URLs).
-- Reference content is distilled from six public Power BI/DAX YouTube courses; advanced "PRO+" items should be verified against Microsoft Learn (https://learn.microsoft.com/power-bi/).
+- Reference content is distilled from six public Power BI/DAX YouTube courses; "(beyond app)" and PRO+ items move faster — verify against Microsoft Learn (https://learn.microsoft.com/power-bi/).
+- Treat DAX as a query language over a columnar store (VertiPaq), not a spreadsheet formula language — that reframing makes performance intuitive.
