@@ -151,13 +151,13 @@ export function GuideMeButton({ variant = "top" }) {
   if (variant === "card") {
     return (
       <button onClick={copy} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold" style={{ background: done ? c.green : c.violet, color: "#fff" }}>
-        {done ? <Check size={14} /> : <Sparkles size={14} />} {done ? "Copied — paste into Claude" : "Ask Claude to guide me"}
+        {done ? <Check size={14} /> : <Sparkles size={14} />} {done ? "Copied! Paste into Claude Desktop to continue" : "Ask Claude to guide me"}
       </button>
     );
   }
   return (
     <button onClick={copy} title="Copy a prompt to paste into Claude — it'll guide you through the app" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition" style={{ background: done ? c.green : c.paper, color: done ? "#fff" : c.ink, border: `1px solid ${done ? c.green : c.line}` }}>
-      {done ? <Check size={14} /> : <Sparkles size={14} color={c.rust} />} {done ? "Copied!" : "Ask Claude to guide me"}
+      {done ? <Check size={14} /> : <Sparkles size={14} color={c.rust} />} {done ? "Copied! Paste into Claude Desktop to continue" : "Ask Claude to guide me"}
     </button>
   );
 }
