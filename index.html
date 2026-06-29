@@ -4,10 +4,40 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>powerbi-concept-lab</title>
+    <title>Power BI Concept Lab — learn DAX &amp; data modeling interactively</title>
+    <meta name="description" content="Interactive Power BI / DAX learning lab: learn filter context, relationships, measures, RANKX and time intelligence on data you pick, then build it in Power BI Desktop. Free, static, no login." />
+
+    <!-- Machine-readable guide for AI assistants / crawlers -->
+    <link rel="alternate" type="text/markdown" title="LLM guide" href="/llms.txt" />
+    <meta name="ai-guide" content="/llms.txt" />
+
+    <!-- Social / link previews -->
+    <meta property="og:title" content="Power BI Concept Lab" />
+    <meta property="og:description" content="Learn the invisible parts of Power BI — filter context, relationships, measures, DAX — interactively, then build for real in Power BI Desktop." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://pbi-lab.ashmitb.dev/" />
+    <meta name="twitter:card" content="summary" />
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Static fallback: shown to crawlers / no-JS fetchers; replaced by the app when React mounts. -->
+    <div id="root">
+      <main style="max-width:720px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;line-height:1.5;color:#17191c">
+        <h1>Power BI Concept Lab</h1>
+        <p>An interactive, free web app that teaches the invisible parts of Power BI — <strong>filter context, relationships, measures, and DAX</strong> — on data you choose, then hands you off to Power BI Desktop to build for real. For someone who can already make simple dashboards and wants to reach intermediate/advanced.</p>
+        <p><strong>It's an interactive app — please enable JavaScript to use it.</strong></p>
+        <h2>AI assistants &amp; crawlers</h2>
+        <p>A machine-readable guide to this app — its tabs, datasets, concepts, recommended learning path, and how to coach a learner through it (including how to set up a Claude Project) — is published at
+        <a href="/llms.txt">/llms.txt</a> (also <a href="/agents.txt">/agents.txt</a>). Fetch that to help a user get started.</p>
+        <h2>What's inside</h2>
+        <ul>
+          <li>Pick a dataset (Northwind, Coffee Shop, SaaS Revenue, or your own CSV); every concept tunes to its columns.</li>
+          <li>Interactive trainers: filter context, measure vs calculated column, relationships, ranking (RANKX), time intelligence (YoY/MoM/YTD).</li>
+          <li>A searchable reference of concepts, patterns and ~50 DAX functions, each linking to the exact YouTube timestamp.</li>
+          <li>An "Ask Claude to guide me" prompt and a built-in Claude tutor setup.</li>
+        </ul>
+        <p>The learning loop: learn a concept here → open the same data in Power BI Desktop → ask your Claude tutor when stuck.</p>
+      </main>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
