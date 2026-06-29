@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Copy, Check, MousePointerClick, Lightbulb, Play, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Copy, Check, MousePointerClick, Lightbulb, Play, Sparkles, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { c } from "./theme.js";
 import { VIDEO_REFS, ytUrl, srcTitle } from "./data/reference.js";
 
@@ -162,7 +162,57 @@ export function GuideMeButton({ variant = "top" }) {
   );
 }
 
+// Slicer: pills for low-cardinality columns, a dropdown once there are many distinct
+// values (so a 250-country column doesn't render 250 buttons and freeze the page).
+const SLICER_PILL_MAX = 10;
+const SLICER_OPTION_MAX = 300;
+// Pagination over an in-memory array. Renders only one page's worth of rows, so a
+// 38k-row dataset stays snappy. `resetKey` jumps back to page 1 when filters change.
+export function usePager(items, pageSize = 12, resetKey = "") {
+  const [page, setPage] = useState(0);
+  useEffect(() => { setPage(0); }, [resetKey]);
+  const total = items.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const p = Math.min(page, pages - 1);
+  return {
+    page: p, setPage, pages, total, pageSize,
+    slice: items.slice(p * pageSize, p * pageSize + pageSize),
+    from: total ? p * pageSize + 1 : 0,
+    to: Math.min(total, p * pageSize + pageSize),
+  };
+}
+
+export function Pager({ pager, note }) {
+  if (pager.total <= pager.pageSize) return note ? <div className="text-xs mt-1.5" style={{ color: c.muted }}>{note}</div> : null;
+  const { page, setPage, pages, from, to, total } = pager;
+  const btn = (disabled) => ({ background: c.paper, border: `1px solid ${c.line}`, color: c.ink, opacity: disabled ? 0.35 : 1 });
+  return (
+    <div className="flex items-center gap-1.5 mt-2 text-xs flex-wrap" style={{ color: c.muted }}>
+      <button disabled={page === 0} onClick={() => setPage(0)} className="p-1 rounded-md" style={btn(page === 0)} title="First"><ChevronsLeft size={13} /></button>
+      <button disabled={page === 0} onClick={() => setPage(page - 1)} className="p-1 rounded-md" style={btn(page === 0)} title="Previous"><ChevronLeft size={13} /></button>
+      <span style={{ minWidth: 120, textAlign: "center" }}>{from.toLocaleString()}–{to.toLocaleString()} of {total.toLocaleString()}</span>
+      <button disabled={page >= pages - 1} onClick={() => setPage(page + 1)} className="p-1 rounded-md" style={btn(page >= pages - 1)} title="Next"><ChevronRight size={13} /></button>
+      <button disabled={page >= pages - 1} onClick={() => setPage(pages - 1)} className="p-1 rounded-md" style={btn(page >= pages - 1)} title="Last"><ChevronsRight size={13} /></button>
+      {note && <span className="ml-1">{note}</span>}
+    </div>
+  );
+}
+
 export function Slicer({ label, options, value, onChange }) {
+  const many = options.length > SLICER_PILL_MAX;
+  if (many) {
+    const sorted = [...options].sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true })).slice(0, SLICER_OPTION_MAX);
+    return (
+      <div>
+        <div className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: c.muted }}>{label} <span style={{ color: c.dim }}>· {options.length}</span></div>
+        <select value={value} onChange={(e) => onChange(e.target.value)} className="text-xs rounded-lg px-2.5 py-2 outline-none" style={{ background: c.paper, border: `1px solid ${c.line}`, color: c.ink, maxWidth: 240 }}>
+          <option value="All">All ({options.length})</option>
+          {sorted.map((o) => <option key={String(o)} value={String(o)}>{String(o)}</option>)}
+          {options.length > SLICER_OPTION_MAX && <option disabled>… {options.length - SLICER_OPTION_MAX} more — filter in Power BI</option>}
+        </select>
+      </div>
+    );
+  }
   return (
     <div>
       <div className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: c.muted }}>{label}</div>

@@ -2,9 +2,10 @@ import { useState, useMemo } from "react";
 import { Zap, ArrowRight } from "lucide-react";
 import { c, fmtBy } from "./theme.js";
 import { applyContext, distinctValues } from "./lib/model.js";
-import { Pill, Slicer, Try, Takeaway, Code } from "./ui.jsx";
+import { Pill, Slicer, Try, Takeaway, Code, usePager, Pager } from "./ui.jsx";
 
 const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const PAGE = 12; // rows per page in trainer tables
 
 // ── FILTER CONTEXT ──────────────────────────────────────────────────────────
 export function FilterContext({ ds }) {
@@ -20,6 +21,9 @@ export function FilterContext({ ds }) {
   const inCtx = (r) => applyContext([r], ctx, ignore).length === 1;
   const rows = ds.factRows.filter(inCtx);
   const value = measure.eval(rows);
+  // Show in-context rows first so the highlight is visible on page 1, then the rest — paginated.
+  const ordered = rows.length === ds.factRows.length ? ds.factRows : [...rows, ...ds.factRows.filter((r) => !inCtx(r))];
+  const pager = usePager(ordered, PAGE, JSON.stringify(ctx) + override + mId);
 
   const formula = override
     ? `${measure.label} (ignore ${firstDim}) =\nCALCULATE( [${measure.label}], ALL(${ds.fact}[${firstDim}]) )`
@@ -61,7 +65,7 @@ export function FilterContext({ ds }) {
                 {ds.rowValue && <th className="text-left px-2.5 py-2 font-bold" style={{ color: c.muted }}>{ds.rowValue.label}</th>}
               </tr></thead>
               <tbody>
-                {ds.factRows.map((r, i) => {
+                {pager.slice.map((r, i) => {
                   const on = inCtx(r);
                   return (
                     <tr key={i} style={{ background: on ? c.violetSoft : c.paper, opacity: on ? 1 : 0.38 }}>
@@ -76,6 +80,7 @@ export function FilterContext({ ds }) {
           <div className="text-xs mt-1.5 flex items-center gap-1.5" style={{ color: c.muted }}>
             <span className="inline-block w-3 h-3 rounded" style={{ background: c.violetSoft }} /> highlighted = inside the current filter context
           </div>
+          <Pager pager={pager} note={ds.factRows.length > PAGE ? "full dataset opens in Power BI" : ""} />
         </div>
 
         <div className="rounded-xl p-4 flex flex-col justify-center" style={{ background: c.ink }}>
@@ -101,6 +106,7 @@ export function MeasureVsColumn({ ds }) {
   const rows = ds.factRows.filter((r) => val === "All" || String(r[dim]) === String(val));
   const measureVal = rows.reduce((s, r) => s + rv.expr(r), 0);
   const rhs = rv.dax.split("=").slice(1).join("=").trim();
+  const pager = usePager(ds.factRows, PAGE, mode + val);
 
   return (
     <div>
@@ -127,7 +133,7 @@ export function MeasureVsColumn({ ds }) {
             {mode === "column" && <th className="text-left px-2.5 py-2 font-bold" style={{ color: c.rust }}>{rv.label} ▸ stored per row</th>}
           </tr></thead>
           <tbody>
-            {ds.factRows.map((r, i) => (
+            {pager.slice.map((r, i) => (
               <tr key={i} style={{ background: c.paper }}>
                 {ds.dims.slice(0, 2).map((d) => <td key={d} className="px-2.5 py-2">{String(r[d])}</td>)}
                 {mode === "column" && <td className="px-2.5 py-2 font-semibold" style={{ color: c.rust }}>{fmt(rv.expr(r))}</td>}
@@ -136,6 +142,7 @@ export function MeasureVsColumn({ ds }) {
           </tbody>
         </table>
       </div>
+      <Pager pager={pager} note={ds.factRows.length > PAGE ? "full dataset opens in Power BI" : ""} />
 
       {mode === "measure" && (
         <div className="rounded-xl p-4 mt-3 flex items-center justify-between" style={{ background: c.violetSoft }}>
@@ -239,6 +246,7 @@ export function RankX({ ds }) {
 
   const dax = `Rank by ${measure.label} =\nRANKX(\n    ALL(${ds.fact}[${dim}]),\n    [${measure.label}], ,\n    ${asc ? "ASC" : "DESC"}, ${dense ? "DENSE" : "SKIP"}\n)`;
   const maxVal = Math.max(...members.map((m) => m.val), 1);
+  const pager = usePager(members, PAGE, dim + mId + asc + dense);
 
   return (
     <div>
@@ -268,7 +276,7 @@ export function RankX({ ds }) {
             <th className="text-left px-2.5 py-2 font-bold">{measure.label}</th>
           </tr></thead>
           <tbody>
-            {members.map((m, i) => (
+            {pager.slice.map((m, i) => (
               <tr key={i} style={{ background: c.paper }}>
                 <td className="px-2.5 py-2 font-bold" style={{ color: c.rust }}>{m.rank}</td>
                 <td className="px-2.5 py-2">{String(m.v)}</td>
@@ -281,6 +289,7 @@ export function RankX({ ds }) {
           </tbody>
         </table>
       </div>
+      <Pager pager={pager} />
 
       <div className="rounded-lg p-2.5 mt-3 text-xs" style={{ background: c.apricot }}>
         <strong>Context transition:</strong> inside <code>RANKX</code>, referencing <code>[{measure.label}]</code> silently wraps it in CALCULATE, so each row is filtered to its own {dim}. Without that, every row would show the grand total.
