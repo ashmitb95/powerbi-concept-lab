@@ -27,6 +27,31 @@ export function inferColumns(rows) {
 export const distinctValues = (rows, col) =>
   [...new Set(rows.map((r) => r[col]).filter((v) => v !== null && v !== undefined && v !== ""))];
 
+// A numeric column is really a *dimension* (something you slice/group BY) — not a
+// measure to sum — when it's a year/month/etc., or a low-cardinality integer code.
+// (Summing a Year column is meaningless; it should behave like a category.)
+function looksDimensionalNumber(name, rows) {
+  if (/\b(year|yr|fy|quarter|qtr|month|week|weekday|day|dayofweek|hour|rating|stars?)\b/i.test(name)) return true;
+  const vals = rows.map((r) => r[name]).filter((v) => v !== null && v !== undefined && v !== "");
+  if (!vals.length) return false;
+  const allInt = vals.slice(0, 200).every((v) => Number.isInteger(Number(v)));
+  return allInt && new Set(vals).size <= 24;
+}
+
+// Split a table's columns into dimensions (slice/group by), measures (aggregate),
+// and a date column — smarter than "text=dim, number=measure".
+export function classifyColumns(rows) {
+  const cols = inferColumns(rows);
+  const dims = [], nums = [];
+  let dateCol = null;
+  for (const col of cols) {
+    if (col.type === "date") { if (!dateCol) dateCol = col.name; continue; }
+    if (col.type === "number" && !looksDimensionalNumber(col.name, rows)) nums.push(col.name);
+    else dims.push(col.name);
+  }
+  return { cols, dims, nums, dateCol };
+}
+
 // ── Aggregations over a set of rows (the building blocks of the measures) ──
 export const agg = {
   sum: (rows, col) => rows.reduce((s, r) => s + (Number(r[col]) || 0), 0),

@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { inferColumns } from "./model.js";
+import { classifyColumns } from "./model.js";
 
 // Parse an uploaded CSV File into a live dataset the trainers can use.
 // Everything happens in the browser — her file never leaves the machine.
@@ -20,10 +20,7 @@ export function datasetFromCsv(file) {
 }
 
 function buildByoDataset(name, rows) {
-  const cols = inferColumns(rows);
-  const dims = cols.filter((c) => c.type === "text").map((c) => c.name);
-  const nums = cols.filter((c) => c.type === "number").map((c) => c.name);
-  const dateCol = cols.find((c) => c.type === "date")?.name || null;
+  const { cols, dims, nums, dateCol } = classifyColumns(rows);
 
   const measures = [];
   if (nums.length) {
