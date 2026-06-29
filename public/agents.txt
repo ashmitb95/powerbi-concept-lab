@@ -1,0 +1,56 @@
+# Power BI Concept Lab
+
+> An interactive, free, static web app that teaches the invisible parts of Power BI — filter context, relationships, measures, and DAX — on data the user chooses, then hands them off to Power BI Desktop to build for real. Aimed at someone who can already make simple dashboards and wants to reach intermediate/advanced.
+
+This file orients an AI assistant (e.g. Claude) so it can guide a learner through the app agentically. If a user pastes this app's URL and asks for help, use the structure below to coach them.
+
+## How the app works (the learning loop)
+
+1. Learn a concept interactively in the app, on a dataset the user picks.
+2. Open that same dataset in Power BI Desktop (the app provides the connector + URL) and rebuild it for real — Power BI is where real DAX runs.
+3. Get unstuck by pasting DAX / errors / screenshots to a Claude tutor.
+
+The app is a companion and safety net, NOT a replacement for Power BI Desktop, and it cannot execute real DAX (that needs Power BI's engine).
+
+## Navigation (tabs)
+
+- Start here — a first-session walkthrough with a recommended ordered path and an "Ask Claude to guide me" button.
+- Datasets — pick a dataset, see its concepts, and an "Open in Power BI" card with the exact connector/URL.
+- Reference — a searchable library of concepts, patterns, and ~50 DAX functions; every entry links to the exact YouTube timestamp where it's taught. Press "/" to search.
+- Tutor — generates instructions for a Claude Project and per-lesson help prompts.
+
+## Datasets (built-in, with live interactive trainers)
+
+- Northwind — Products + Orders. Concepts: filter context, measure vs column, relationships, ranking.
+- Coffee Shop — Menu + Orders across Indian cities. Same concepts, different columns.
+- SaaS Revenue — two years of monthly revenue (a dated table). Concept: time intelligence (YoY / MoM / YTD).
+- Bring your own CSV — parsed in the browser; concepts auto-tune to the user's columns.
+
+## Concepts / trainers
+
+- filter-context — a measure recomputes against the filters around it; CALCULATE(ALL(...)) override.
+- measure-vs-column — same formula, two behaviours (row context vs filter context).
+- relationships — filters flow from the dimension (one) to the fact (many); single vs both cross-filter.
+- ranking — RANKX, tie handling (SKIP vs DENSE), and context transition.
+- time-intelligence — DATEADD / TOTALYTD for prior year, prior month, YoY, MoM, YTD.
+
+## Recommended first session
+
+1. Northwind → Filter context
+2. Northwind → Measure vs column
+3. Northwind → Relationships
+4. Coffee Shop → Ranking (RANKX)
+5. SaaS Revenue → Time intelligence
+
+## How to guide the user
+
+- Orient them in 3-4 lines, then suggest the first thing to click.
+- Walk the recommended path one step at a time, checking in after each.
+- When they paste DAX / an error / a screenshot: decode it in plain English, give corrected copy-pasteable DAX, and tie it back to filter context, row context, and relationships.
+- Push toward the "why"; keep it concise; don't re-explain basics unless asked.
+- Remind them to open the dataset in Power BI Desktop and rebuild it there.
+
+## Notes
+
+- Static SPA: no backend, no accounts, no API keys. Navigation state is client-side (no per-tab URLs), so guide the user by tab/dataset/concept names rather than deep links.
+- Reference content is distilled from six public Power BI/DAX YouTube courses; advanced "PRO+" items should be verified against Microsoft Learn (https://learn.microsoft.com/power-bi/).
